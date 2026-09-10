@@ -5,13 +5,15 @@ Prototipo académico basado en reglas, asociado al TFE **Propuesta de solución 
 ## Herramienta y descarga
 
 - [Descargar la herramienta completa con código, manual y pruebas](./Herramienta_TFE_Floricultura.zip).
-- [Consultar el código fuente completo de la aplicación](./index.html).
+- [Consultar el motor de reglas](./motor.js) y [la lógica de la interfaz](./app.js).
 - [Consultar la documentación](./LEEME.html).
 - [Consultar las 19 condiciones y su correspondencia H/R](./trazabilidad.csv).
 
-Para utilizarla sin instalación, descargue el ZIP, extraiga su contenido y abra **Herramienta_orientacion_floricultura.html** en un navegador con JavaScript. No necesita crear una cuenta ni mantener una conexión a Internet para evaluar las condiciones.
+Para utilizarla sin instalación, descargue el ZIP, extraiga su contenido y abra **index.html** en un navegador con JavaScript. Conserve juntos los archivos de la carpeta. No necesita crear una cuenta ni mantener una conexión a Internet para evaluar las condiciones.
 
-La aplicación es autocontenida: `index.html` incluye la interfaz y el motor de reglas íntegro, sin bibliotecas externas. El ZIP conserva además la estructura de desarrollo reproducible, con los directorios `docs`, `tests` y `scripts`, el manual y las sumas de integridad SHA-256. No es un archivo de resultados simulados ni una captura del programa: contiene la herramienta ejecutable y su código.
+La aplicación utiliza únicamente archivos del propio paquete: `index.html` contiene la estructura, `estilos.css` el diseño, `motor.js` las reglas y `app.js` la interacción. No carga bibliotecas ni servicios de terceros. El repositorio y el ZIP incluyen los archivos fuente legibles, el manual, las pruebas y las sumas de integridad SHA-256.
+
+La versión 1.2.0 reemplaza la distribución anterior. Utilice la descarga actual: se separaron los archivos de la aplicación, se restringió la ejecución de scripts y se reconstruyó la interfaz mediante nodos de texto. Consulte [SEGURIDAD.md](./SEGURIDAD.md) para conocer el alcance de la revisión.
 
 ## Qué hace
 
@@ -38,8 +40,8 @@ Los tres casos incluidos son **ejemplos ficticios** para comprobar el comportami
 Después de extraer el paquete completo, con Node.js 18 o posterior, ejecute desde la carpeta extraída:
 
 ```text
-node tests/reglas.test.cjs
-node scripts/verificar-entrega.cjs
+node reglas.test.cjs
+node verificar.cjs
 ```
 
 Se comprobaron **12 pruebas del motor, con 12 aprobadas y cero fallidas**, junto con la sintaxis, la tabla de 19 condiciones, la integridad del ZIP y sus sumas SHA-256. La lógica de las reglas se mantiene sin cambios respecto del prototipo incluido en la revisión del TFE. Estas pruebas de software no constituyen una validación empresarial, una certificación ni una aprobación académica.
@@ -56,4 +58,20 @@ La aplicación no solicita datos personales, no recibe archivos, no guarda respu
 
 Proyecto académico de Paul Albert Soltys Galvis. Se utilizó asistencia de inteligencia artificial para programación, edición y comprobaciones técnicas; no para fabricar resultados empíricos. La disponibilidad del código para revisión no equivale a otorgar una licencia general de software libre.
 
-**Versión:** 1.1.0 · **Fecha:** 10 de septiembre de 2026.
+## Archivos
+
+| Archivo | Función |
+| --- | --- |
+| index.html | Página de entrada |
+| estilos.css | Diseño adaptable e impresión |
+| motor.js | Catálogo de condiciones y reglas de decisión |
+| app.js | Formulario, navegación y resultados |
+| LEEME.html, manual.css | Manual de uso |
+| trazabilidad.csv | Correspondencia entre condiciones, hallazgos y requisitos |
+| reglas.test.cjs | Doce pruebas reproducibles |
+| verificar.cjs | Comprobaciones estructurales y de seguridad del código |
+| empaquetar.cjs | Generación reproducible de la entrega ZIP |
+| SEGURIDAD.md | Alcance de la revisión y aviso de sustitución |
+| SHA256SUMS.txt | Integridad de los archivos de la entrega |
+
+**Versión:** 1.2.0 · **Fecha:** 10 de septiembre de 2026.

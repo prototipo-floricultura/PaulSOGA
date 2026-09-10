@@ -1,138 +1,51 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Documentación de la herramienta TFE</title><style>html{background:#f2f6f4}body{font:16px/1.65 "Segoe UI",Arial,sans-serif;color:#17392f;max-width:960px;margin:32px auto;padding:32px clamp(20px,5vw,60px);background:#fff;border:1px solid #dce5df;border-radius:16px}a{color:#167451}nav{padding:8px 0 24px;border-bottom:1px solid #dce5df;margin-bottom:30px}h1,h2{line-height:1.25;letter-spacing:-.025em}h1{font:2rem/1.2 Georgia,serif;color:#113c30}pre{overflow:auto;background:#f2f6f4;padding:16px;border-radius:9px}hr{border:0;border-top:1px solid #dce5df;margin:40px 0}code{overflow-wrap:anywhere}@media print{nav{display:none}body{border:0;padding:0;margin:0}}</style></head><body><nav><a href="index.html">← Volver a la herramienta</a></nav><h1>Manual de uso</h1>
-
-<h2>1. Acceso</h2>
-
-<p>Abra la herramienta en línea o descomprima la descarga y haga doble clic en <code>Herramienta_orientacion_floricultura.html</code>. Active JavaScript en un navegador actual. No necesita crear una cuenta para usar el archivo descargado.</p>
-
-<h2>2. Preparación</h2>
-
-<p>Responda con apoyo de una persona que conozca los procesos y las evidencias de la empresa. No introduzca datos personales. La aplicación no recibe documentos ni comprueba su autenticidad.</p>
-
-<h2>3. Diligenciamiento</h2>
-
-<p>Use las cinco fases de la navegación lateral —superior en pantallas pequeñas— o los botones <strong>Anterior</strong> y <strong>Siguiente fase</strong>. Cambiar de fase no borra las respuestas. Los contadores indican cuántas condiciones tienen una respuesta Sí o No; no representan cumplimiento ni madurez.</p>
-
-<p>Para cada una de las 19 condiciones seleccione:</p>
-
-<p>- <strong>Sí:</strong> existe evidencia suficiente y revisable de la condición.</p>
-<p>- <strong>No:</strong> se confirmó que la condición no está satisfecha.</p>
-<p>- <strong>No comprobado:</strong> no se dispone de información suficiente para decidir.</p>
-
-<p>El estado inicial es <strong>No comprobado</strong> en todas las condiciones. Revise también las preguntas que activan las fases opcionales: necesidad de calidad visual asistida y necesidad de trazabilidad ampliada.</p>
-
-<h2>4. Generar y leer el resultado</h2>
-
-<p>Seleccione <strong>Generar orientación</strong>. El resultado indica la primera fase pendiente, las condiciones que la detienen, los productos o evidencias necesarios antes de avanzar y las incoherencias entre prerrequisitos y capacidades declaradas.</p>
-
-<p>Puede generar la orientación sin terminar todas las fases: las condiciones no revisadas siguen como <strong>No comprobado</strong>. Si cambia una respuesta después de obtener el resultado, aparece un aviso de actualización pendiente; seleccione nuevamente <strong>Generar orientación</strong>.</p>
-
-<p>Los rótulos H01–H15 y R identifican la relación con los hallazgos y requisitos del TFE. No son puntuaciones ni resultados producidos por inteligencia artificial. Una fase «declarada cumplida» no equivale a una certificación: debe corroborarse su evidencia.</p>
-
-<h2>5. Casos demostrativos</h2>
-
-<p>Abra <strong>Explorar con un ejemplo ficticio</strong> y elija uno de los tres casos:</p>
-
-<p>- <strong>Base manual:</strong> orienta a la fase 0 porque faltan condiciones de alineación.</p>
-<p>- <strong>Datos listos, sin IA:</strong> declara completas las fases obligatorias; no activa módulos avanzados que no se necesitan.</p>
-<p>- <strong>Trazabilidad sin registros base:</strong> vuelve a la fase 1 y advierte la dependencia incumplida.</p>
-
-<p>Los ejemplos son ficticios. Puede cambiar cualquier respuesta después de cargarlos. No use estos ejemplos como resultados de una empresa real.</p>
-
-<h2>6. Imprimir o guardar en PDF</h2>
-
-<p>Seleccione <strong>Imprimir resultado</strong>. El navegador vuelve a calcular la orientación con las respuestas actuales y abre su diálogo de impresión. Puede elegir una impresora o <strong>Guardar como PDF</strong>. Revise el contenido antes de compartirlo.</p>
-
-<h2>7. Reiniciar</h2>
-
-<p>Seleccione <strong>Limpiar</strong> para volver al estado inicial. Recargar o cerrar la página también elimina las respuestas de la sesión. La aplicación no conserva un historial de evaluaciones.</p>
-
-<h2>8. Interpretación responsable</h2>
-
-<p>No utilice el resultado como única base para invertir, certificar, contratar o evaluar el desempeño de personas. La recomendación sirve para organizar una revisión de condiciones y evidencias. La validación empresarial, las pruebas de integración y la evaluación de utilidad quedan fuera de las pruebas funcionales incluidas.</p>
-<hr><h1>Nota técnica</h1>
-
-<h2>Producto implementado</h2>
-
-<p>Aplicación web estática, autocontenida, escrita en HTML, CSS y JavaScript. El archivo <code>dist/index.html</code> incluye la presentación, el catálogo de condiciones, el motor determinista y los controladores de interfaz. Puede ejecutarse desde disco o desde un alojamiento estático. No requiere servicios de datos ni credenciales de API.</p>
-
-<h2>Entradas, proceso y salidas</h2>
-
-<p>| Elemento | Implementación |</p>
-<p>| --- | --- |</p>
-<p>| Entradas | 19 condiciones agregadas; tres estados permitidos por condición. |</p>
-<p>| Normalización | Una respuesta ausente o ajena al catálogo se interpreta como <code>no_comprobado</code>. |</p>
-<p>| Núcleo obligatorio | Fases 0, 1 y 2, en ese orden. |</p>
-<p>| Módulos condicionados | Fase 3 activada por <code>visualCase</code>; fase 4 por <code>traceabilityNeed</code>. |</p>
-<p>| Decisión | Primera fase activada con criterios que no sean <code>si</code>. |</p>
-<p>| Explicación | Condiciones pendientes, evidencias de salida, avisos y correspondencia H/R. |</p>
-<p>| Persistencia | Ninguna; únicamente memoria de la página. |</p>
-<p>| Comunicación | No se transmiten respuestas ni se solicitan servicios externos. |</p>
-
-<h2>Relación entre análisis cualitativo y software</h2>
-
-<p>Los requisitos ya establecidos en el TFE se operacionalizan en condiciones verificables y dependencias de adopción. El motor no aprende de las 200 respuestas, no vuelve a codificar las 64 unidades de sentido y no estima una distribución sectorial. La clasificación cualitativa del corpus y la orientación por reglas de este software son operaciones diferentes.</p>
-
-<p>La tabla <code>docs/trazabilidad.csv</code> se genera directamente desde el catálogo que ejecuta el programa. Así, las condiciones publicadas, sus fases y sus referencias coinciden con el código entregado.</p>
-
-<h2>Criterios de seguridad y privacidad</h2>
-
-<p>- Política CSP restrictiva: no se permiten conexiones salientes del programa.</p>
-<p>- Sin scripts, hojas de estilo, tipografías o imágenes de terceros.</p>
-<p>- Sin formularios enviados al servidor, archivos subidos, analítica o cookies de aplicación.</p>
-<p>- El texto insertado en resultados pasa por escape HTML.</p>
-<p>- No se distribuyen documentos de campo ni datos de participantes.</p>
-<p>- El servidor de vista previa atiende solamente archivos de <code>dist</code> y solo desde la interfaz local.</p>
-
-<h2>Integración opcional con agentes</h2>
-
-<p>Cuando el navegador expone la interfaz WebMCP compatible, se registra una operación de orientación sobre las mismas condiciones de la interfaz. Valida las entradas y actualiza el mismo resultado visible. En navegadores sin esa capacidad, la aplicación conserva íntegramente su funcionamiento manual. Esta integración no implica que el motor use inteligencia artificial para decidir.</p>
-
-<h2>Límites de la comprobación</h2>
-
-<p>Las pruebas automatizadas verifican secuencia, dependencias, fases opcionales, consistencia de referencias, integridad de archivos y ausencia de conexiones de envío en el programa. No acreditan validez diagnóstica, precisión predictiva, mejoras de productividad ni aceptación por empresas o evaluadores académicos.</p>
-
-<h2>Reproducibilidad</h2>
-
-<p>No existen dependencias externas de ejecución. Los scripts de desarrollo usan módulos incluidos en Node.js. El paquete descargable y el inventario de integridad se generan desde el mismo archivo que se publica. El archivo <code>SHA256SUMS.txt</code> permite identificar los contenidos de la entrega sin incluir credenciales ni material de campo.</p>
-<hr><h1>Comprobación funcional</h1>
-
-<p>La batería reproducible <code>tests/reglas.test.cjs</code> ejecuta directamente el motor de reglas incrustado en la herramienta. No se utiliza una copia distinta del algoritmo.</p>
-
-<h2>Casos comprobados</h2>
-
-<p>1. Respuestas faltantes: orientación a fase 0.</p>
-<p>2. Capacidades de nube con captura pendiente: prioridad de fase 1.</p>
-<p>3. Fases posteriores declaradas con prerrequisitos incompletos: estado bloqueado.</p>
-<p>4. Recursos preliminares: no se exige un TCO completo para la entrada a fase 0.</p>
-<p>5. Ausencia de caso visual: la IA no se activa.</p>
-<p>6. Caso visual confirmado con controles pendientes: orientación a fase 3.</p>
-<p>7. Todas las fases activadas y declaradas completas: sin condición activada pendiente.</p>
-<p>8. Trazabilidad ampliada sin eventos base: advertencia y retorno a fase 1.</p>
-<p>9. Trazabilidad ampliada sin necesidad de IA: fase 4 permitida después del núcleo.</p>
-<p>10. Catálogo de estados y referencias H/R consistente.</p>
-<p>11. Cobertura de los 15 hallazgos y 15 requisitos documentados.</p>
-<p>12. Aplicación autocontenida y sin canales de envío de respuestas.</p>
-
-<h2>Alcance</h2>
-
-<p>Estas pruebas son verificaciones de software. No son evaluaciones realizadas por empresas, pruebas de exactitud diagnóstica, evidencia de productividad ni aprobación académica.</p>
-
-<p>La verificación adicional <code>scripts/verificar-entrega.cjs</code> revisa la sintaxis de JavaScript, los archivos documentales y la tabla de 19 condiciones. La integridad del ZIP se comprueba mediante lectura de todos sus archivos y sus sumas SHA-256.</p>
-
-<h2>Compatibilidad opcional WebMCP</h2>
-
-<p>El programa incorpora una operación opcional para navegadores con WebMCP. No se presenta como verificada en un contexto nativo WebMCP si ese contexto no está disponible. Esta limitación no afecta a los controles manuales ni al motor de orientación.</p>
-
-<h2>Repetir las pruebas</h2>
-
-<p>Desde la raíz del código fuente, con Node.js 18 o posterior:</p>
-
-<pre>
-node tests/reglas.test.cjs
-
-node scripts/verificar-entrega.cjs
-
-</pre>
-
-<p>La salida debe indicar 12 pruebas aprobadas y cero fallidas, seguida de la comprobación documental. Cualquier error detiene el proceso con un código de salida no satisfactorio.</p>
-</body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>Manual · Orientación tecnológica para floricultura</title>
+  <link rel="stylesheet" href="manual.css">
+</head>
+<body>
+  <nav><a href="index.html">← Volver a la herramienta</a></nav>
+  <main>
+    <p class="eyebrow">Versión 1.2.0 · Manual de uso</p>
+    <h1>Orientación tecnológica para floricultura</h1>
+    <h2>1. Acceso</h2>
+    <p>Abra la herramienta en línea o extraiga la descarga ZIP y abra <strong>index.html</strong>. Conserve juntos todos los archivos. El uso del programa descargado no exige registro, instalación ni conexión a Internet; requiere JavaScript habilitado en el navegador.</p>
+    <h2>2. Preparación</h2>
+    <p>Responda con apoyo de una persona que conozca los procesos y la evidencia de la empresa. No introduzca datos personales. El programa no recibe documentos ni comprueba su autenticidad.</p>
+    <h2>3. Revisión de condiciones</h2>
+    <p>Utilice la navegación por fases o los botones <strong>Anterior</strong> y <strong>Siguiente fase</strong>. Cambiar de fase no borra las respuestas.</p>
+    <ul><li><strong>Sí:</strong> existe evidencia suficiente y revisable.</li><li><strong>No:</strong> se confirmó la ausencia de la condición.</li><li><strong>No comprobado:</strong> la información todavía es insuficiente.</li></ul>
+    <p>El estado inicial es No comprobado para las 19 condiciones. Los contadores indican respuestas con Sí o No: no representan cumplimiento, madurez ni una calificación.</p>
+    <h2>4. Generar el resultado</h2>
+    <p>Seleccione <strong>Generar orientación</strong>. Puede hacerlo sin completar todas las fases: lo no revisado permanece como No comprobado. El resultado muestra la primera fase pendiente, las condiciones que impiden avanzar, las evidencias de salida y las dependencias incumplidas.</p>
+    <p>Las referencias H01–H15 y R vinculan cada condición con hallazgos y requisitos del TFE. Una fase declarada cumplida no equivale a certificación: debe corroborarse su evidencia.</p>
+    <p>Si cambia una respuesta después de generar la orientación, aparece un aviso. Vuelva a generar el resultado para actualizarlo.</p>
+    <h2>5. Secuencia de la hoja de ruta</h2>
+    <ol start="0"><li><strong>Alineación:</strong> alcance, gobierno, línea base y recursos.</li><li><strong>Captura básica:</strong> formatos, conectividad, mantenimiento, seguridad, aprendizaje y eventos por lote.</li><li><strong>Nube y tableros:</strong> consolidación, accesos y reportes operativos.</li><li><strong>Calidad asistida:</strong> condicionada a una necesidad visual comprobada.</li><li><strong>Trazabilidad ampliada:</strong> condicionada a una necesidad comprobada y a los registros base.</li></ol>
+    <p>Las fases 0, 1 y 2 son obligatorias y secuenciales. La fase 4 no requiere activar la fase 3 si no existe necesidad de inteligencia artificial. Una condición con No o No comprobado impide declarar completa la fase correspondiente.</p>
+    <h2>6. Ejemplos ficticios</h2>
+    <p>Abra <strong>Explorar con un ejemplo ficticio</strong>:</p>
+    <ul><li><strong>Base manual:</strong> devuelve la fase 0.</li><li><strong>Datos listos, sin IA:</strong> declara cumplida la ruta base, sin activar capacidades innecesarias.</li><li><strong>Trazabilidad sin registros base:</strong> vuelve a la fase 1 y advierte la dependencia incumplida.</li></ul>
+    <p>Los ejemplos no representan empresas, participantes ni resultados del estudio. Su carácter ficticio se conserva también al imprimir.</p>
+    <h2>7. Imprimir, guardar y reiniciar</h2>
+    <p><strong>Imprimir resultado</strong> recalcula la orientación con las respuestas actuales y abre el diálogo de impresión. Puede elegir una impresora o guardar un PDF.</p>
+    <p><strong>Limpiar</strong> restablece el estado inicial. Recargar o cerrar la página elimina las respuestas, pues no se conserva un historial.</p>
+    <h2>8. Alcance académico</h2>
+    <p>Es un prototipo de orientación por reglas, no un clasificador predictivo ni un modelo de aprendizaje automático entrenado. No calcula probabilidades ni una puntuación de madurez. No verifica documentos ni acredita una implementación productiva.</p>
+    <p>Las ocho personas consultadas fundamentan los hallazgos y requisitos; no constituyen ocho empresas clasificadas ni un conjunto de entrenamiento. El resultado debe contrastarse con evidencia, responsables y criterios de aceptación antes de invertir o escalar.</p>
+    <h2>9. Código y comprobaciones</h2>
+    <p>El paquete contiene el código íntegro. Con Node.js 18 o posterior pueden repetirse las comprobaciones desde la carpeta extraída:</p>
+    <pre>node reglas.test.cjs
+node verificar.cjs</pre>
+    <p>Se incluyen 12 pruebas de la lógica. Son verificaciones de software, no una validación empresarial ni una aprobación académica.</p>
+    <h2>10. Privacidad y seguridad</h2>
+    <p>La evaluación se realiza en memoria dentro del navegador. No solicita datos personales, no carga archivos, no guarda respuestas y no las envía. La impresión crea un archivo bajo el control del usuario. El proveedor de alojamiento puede tratar los datos técnicos normales de acceso web.</p>
+    <p>Utilice la versión actual 1.2.0, que reemplaza la descarga anterior. No desactive el antivirus ni añada exclusiones para abrir una versión marcada por seguridad.</p>
+  </main>
+  <footer>Proyecto académico de Paul Albert Soltys Galvis · 10 de septiembre de 2026</footer>
+</body>
+</html>

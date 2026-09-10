@@ -1,0 +1,11 @@
+{
+  "name": "orientacion-floricultura-tfe",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Prototipo académico de orientación tecnológica por reglas",
+  "scripts": {
+    "test": "node reglas.test.cjs && node verificar.cjs",
+    "package": "node empaquetar.cjs"
+  },
+  "engines": {"node": ">=18"}
+}
