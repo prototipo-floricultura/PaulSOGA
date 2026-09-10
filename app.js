@@ -27,7 +27,10 @@
     const item = model.CRITERIA[key];
     const row = node("div", "criterion" + (item.gate ? " gate" : ""));
     const description = node("div");
-    description.append(node("h3", "", item.title), node("p", "", item.prompt), node("div", "trace", item.refs));
+    const prompt = key === "visualCase"
+      ? "Existe una necesidad concreta de revisión visual que justifica trabajar con imágenes y define qué decisión se busca apoyar."
+      : item.prompt;
+    description.append(node("h3", "", item.title), node("p", "", prompt), node("div", "trace", item.refs));
     const label = node("label");
     label.htmlFor = "field-" + key;
     const select = node("select");
@@ -154,7 +157,11 @@
       grid.append(card("Decisión siguiente", node("p", "", "Conservar evidencias de aceptación, revisar incidentes y activar una fase condicionada solo si existe una necesidad verificable.")));
     }
     if (result.warnings.length) grid.append(card("Incoherencias o dependencias detectadas", textList(result.warnings.map(item=>item.text)), true));
-    if (result.notices.length) grid.append(card("Fases condicionadas", textList(result.notices)));
+    if (result.notices.length) grid.append(card("Fases condicionadas", textList(result.notices.map(text =>
+      text.startsWith("La fase 3 permanece")
+        ? "La fase 3 permanece sin activar hasta comprobar una necesidad de calidad visual asistida."
+        : text
+    ))));
     resultRoot.append(header, grid);
     renderRoute(result.phaseStates);
   }
@@ -213,7 +220,8 @@
   document.querySelectorAll("[data-demo]").forEach(button => button.addEventListener("click", () => {
     const demo = model.DEMOS[button.dataset.demo];
     setAnswers(demo.values);
-    demoBanner.textContent = demo.label + ". Valores ficticios para probar la lógica; no representan una empresa ni resultados de campo.";
+    const demoLabel = button.dataset.demo === "baseReady" ? "Caso demostrativo: datos y tableros listos" : demo.label;
+    demoBanner.textContent = demoLabel + ". Valores ficticios para probar la lógica; no representan una empresa ni resultados de campo.";
     demoBanner.hidden = false;
     run();
     byId("resultTitle").focus();
