@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <title>Prototipo de orientación tecnológica para floricultura</title>
+  <meta name="description" content="Herramienta académica de orientación por reglas: identifica condiciones pendientes y propone una fase inicial de adopción tecnológica en floricultura. No es un modelo predictivo validado.">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17392f; --muted: #536b63; --line: #dce5df;
+      --paper: #fff; --wash: #f2f6f4; --forest: #113c30;
+      --teal: #167451; --lime: #d6ed83; --amber: #925600;
+      --red: #9b3535; --green-wash: #eef8f2; --amber-wash: #fff8e9;
+      --red-wash: #fff3f2; --shadow: 0 5px 28px #163d2d08;
+      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+    body { margin: 0; color: var(--ink); background: var(--wash); font-size: 1rem; line-height: 1.55; }
+    button, select { font: inherit; }
+    button, summary { cursor: pointer; }
+    a { color: var(--teal); }
+    a, button, select { -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 3px solid #1b8262; outline-offset: 4px; }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: clamp(1.75rem, 2.5vw, 2.5rem); font-weight: 650; line-height: 1.15; letter-spacing: -.035em; }
+    h1 span { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-style: italic; }
+    h2 { font-size: 1.25rem; line-height: 1.3; letter-spacing: -.02em; }
+    h3 { font-size: 1rem; line-height: 1.4; }
+    p + p { margin-top: 12px; }
+    .skip-link { position: fixed; top: -100px; left: 12px; z-index: 20; padding: 12px; background: white; }
+    .skip-link:focus { top: 12px; }
+    .app-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { position: sticky; top: 0; align-self: start; min-height: 100vh; padding: 34px 22px 26px; background: var(--forest); color: #fff; display: flex; flex-direction: column; gap: 28px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { width: 42px; height: 42px; border: 1px solid #d6ed8377; border-radius: 13px 3px 13px 3px; display: grid; place-items: center; color: var(--lime); font-weight: 700; letter-spacing: -.06em; flex-shrink: 0; }
+    .brand strong { display: block; font-size: 1.06rem; letter-spacing: -.02em; }
+    .brand small { color: #bfd2c9; font-size: .875rem; }
+    .nav-label { margin: 6px 0 13px; color: #bad2c7; font-size: .75rem; letter-spacing: .11em; text-transform: uppercase; font-weight: 600; }
+    .phase-navigation { display: grid; gap: 8px; }
+    .phase-tab { width: 100%; display: grid; grid-template-columns: 32px minmax(0, 1fr); align-items: center; gap: 10px; border: 1px solid transparent; border-radius: 10px; padding: 12px 10px; background: transparent; color: #d6e5dd; text-align: left; }
+    .phase-tab:hover { background: #ffffff0d; }
+    .phase-tab[aria-pressed="true"] { background: var(--lime); color: var(--forest); }
+    .phase-tab:focus-visible { outline-color: var(--lime); }
+    .nav-number { display: grid; place-items: center; height: 32px; border: 1px solid #a1c3b35e; border-radius: 50%; font-size: .875rem; }
+    .phase-tab[aria-pressed="true"] .nav-number { background: var(--forest); color: var(--lime); border-color: var(--forest); }
+    .nav-name { display: block; font-size: .9375rem; font-weight: 600; line-height: 1.3; }
+    .nav-count { display: block; margin-top: 3px; font-size: .75rem; }
+    .sidebar-links { display: grid; gap: 16px; padding: 18px 10px 0; border-top: 1px solid #a1c3b338; }
+    .sidebar-links a { color: #dce9e2; font-size: .875rem; text-decoration: none; }
+    .sidebar-links a:hover { text-decoration: underline; }
+    .privacy-note { margin-top: auto; padding: 18px 10px 0; color: #bfd2c9; font-size: .875rem; }
+    .privacy-note strong { display: block; margin-bottom: 4px; color: var(--lime); font-size: .875rem; }
+    .shell { width: 100%; max-width: 1550px; margin: 0 auto; padding: 34px clamp(20px, 3vw, 48px) 30px; min-width: 0; }
+    .page-header { display: flex; justify-content: space-between; align-items: start; gap: 24px; padding-bottom: 24px; }
+    .page-header p:not(.eyebrow) { max-width: 680px; color: var(--muted); margin-top: 12px; }
+    .eyebrow { margin-bottom: 8px; color: var(--teal); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; }
+    .version { flex-shrink: 0; border: 1px solid var(--line); border-radius: 30px; padding: 6px 12px; font-size: .75rem; color: var(--muted); white-space: nowrap; }
+    .intro { margin-bottom: 24px; padding: 18px 22px; border: 1px solid var(--line); border-radius: 12px; background: #ffffffa3; }
+    .intro h2 { margin-bottom: 7px; font-size: 1rem; }
+    .intro p { color: var(--muted); }
+    .intro details { margin-top: 12px; padding-top: 10px; }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, 1fr); gap: 24px; align-items: start; }
+    .panel { padding: 26px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); box-shadow: var(--shadow); min-width: 0; }
+    .section-head { display: flex; align-items: start; justify-content: space-between; gap: 18px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+    .section-head p { color: var(--muted); font-size: .875rem; margin-top: 7px; }
+    .phase-heading { display: flex; gap: 14px; align-items: center; padding: 24px 0 4px; }
+    .phase-heading-number { display: grid; place-items: center; flex-shrink: 0; height: 46px; width: 46px; color: var(--teal); background: var(--green-wash); border-radius: 12px; font-size: 1.4rem; font-family: Georgia, serif; }
+    .phase-heading h2 { font-size: 1.125rem; }
+    .phase-heading small { color: var(--muted); font-size: .875rem; }
+    .criterion-list { display: grid; margin-top: 8px; }
+    .criterion { padding: 20px 0; border-bottom: 1px solid var(--line); }
+    .criterion:last-child { border-bottom: 0; }
+    .criterion p { margin-top: 6px; color: var(--muted); font-size: 1rem; }
+    .trace { margin-top: 8px; color: var(--teal); font-size: .875rem; font-weight: 600; }
+    .criterion label { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; font-size: .875rem; color: var(--muted); }
+    select { max-width: 100%; width: 190px; border: 1px solid #a7bcb1; border-radius: 8px; padding: 9px 30px 9px 12px; color: var(--ink); background: var(--wash); cursor: pointer; font-size: 1rem; }
+    select[data-answer="si"] { color: #105e3e; border-color: #90c7a8; background: var(--green-wash); }
+    select[data-answer="no"] { color: var(--red); border-color: #d9aeaa; background: var(--red-wash); }
+    .gate { padding: 18px; margin: 14px -8px 4px; background: #f1f5fd; border: 1px solid #dbe3f2 !important; border-radius: 10px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 15px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; min-height: 44px; padding: 10px 15px; border: 1px solid #b9cec1; border-radius: 9px; background: #fff; color: var(--forest); font-size: .9375rem; font-weight: 600; transition: background .16s, box-shadow .16s; }
+    .button:hover { background: #edf5ef; box-shadow: 0 2px 9px #17392f12; }
+    .button.primary { background: var(--forest); color: #fff; border-color: var(--forest); }
+    .button.primary:hover { background: #1b5842; }
+    .button.subtle { background: transparent; color: var(--muted); }
+    .button:disabled { cursor: default; opacity: .45; box-shadow: none; }
+    .form-actions { border-top: 1px solid var(--line); padding-top: 18px; margin-top: 8px; }
+    .phase-controls { display: flex; justify-content: space-between; gap: 10px; }
+    .form-actions .primary { flex: 1; }
+    .form-note { font-size: .875rem; color: var(--muted); margin-top: 12px; }
+    .notice { padding: 12px 15px; margin-top: 12px; border: 1px solid #e5d4a6; border-radius: 9px; background: var(--amber-wash); color: #775211; font-size: .875rem; }
+    .result-panel { border-top: 4px solid var(--teal); padding-top: 22px; }
+    .result-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .result-label { font-size: .75rem; color: var(--teal); background: var(--green-wash); border-radius: 25px; padding: 4px 10px; }
+    .result { margin-top: 20px; scroll-margin-top: 24px; }
+    .result-hero { padding: 20px; border-radius: 12px; background: var(--amber-wash); border: 1px solid #e7d6ad; }
+    .result-hero.ready { background: var(--green-wash); border-color: #b7d6c4; }
+    .result-hero h2 { font-size: 1.35rem; margin-bottom: 12px; }
+    .result-hero p { font-size: 1rem; }
+    .result-hero .eyebrow { font-size: .75rem; }
+    .result-hero .reading-note { margin-top: 14px; padding-top: 12px; border-top: 1px solid #d9cda9; font-size: .875rem; }
+    .result-grid { display: grid; gap: 14px; margin-top: 14px; }
+    .result-card { padding: 17px; border: 1px solid var(--line); border-radius: 11px; }
+    .result-card ul { padding-left: 20px; margin: 10px 0 0; }
+    .result-card li + li { margin-top: 10px; }
+    .result-card p { margin-top: 10px; }
+    .warning { border-color: #e5c3bf; background: var(--red-wash); }
+    .warning h3 { color: var(--red); }
+    .empty { padding: 26px 20px; border: 1px dashed #b0c9ba; border-radius: 12px; background: #f6faf7; color: var(--muted); }
+    .empty strong { display: block; color: var(--ink); margin-bottom: 8px; }
+    .empty p { font-size: .9375rem; }
+    .route-title { font-size: .875rem; margin-top: 24px; }
+    .phases { display: grid; gap: 8px; margin-top: 12px; }
+    .phase-chip { display: grid; grid-template-columns: 32px minmax(0, 1fr); align-items: center; gap: 11px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--wash); }
+    .route-number { width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid #c6d6cd; border-radius: 50%; font-size: .875rem; }
+    .phase-chip strong { display: block; font-size: .9375rem; font-weight: 600; }
+    .phase-chip .route-state { display: block; margin-top: 2px; color: var(--muted); font-size: .875rem; }
+    .phase-chip[data-state="complete"] { background: var(--green-wash); border-color: #b8d8c5; }
+    .phase-chip[data-state="complete"] .route-number { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .phase-chip[data-state="pending"], .phase-chip[data-state="declared_blocked"] { background: var(--amber-wash); border-color: #e7cd91; }
+    .phase-chip[data-state="pending"] .route-number { color: #fff; background: var(--amber); border-color: var(--amber); }
+    .support-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(260px, 1fr); gap: 24px; margin-top: 24px; align-items: start; }
+    .support-grid h2 { margin-bottom: 14px; }
+    .support-grid p { color: var(--muted); }
+    .download-panel { background: #e9f2ec; border-color: #ccded1; }
+    .download-panel .toolbar { flex-direction: column; align-items: stretch; }
+    details { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 16px; }
+    summary { font-weight: 600; font-size: .9375rem; color: var(--teal); }
+    details[open] summary { margin-bottom: 14px; }
+    .rules-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: .875rem; }
+    .rules-table th, .rules-table td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+    .rules-table th { background: var(--wash); }
+    footer { padding-top: 24px; color: var(--muted); font-size: .8125rem; }
+    @media (min-width: 1700px) { .criterion { display: grid; grid-template-columns: minmax(0, 1fr) 185px; gap: 18px; align-items: center; } .criterion label { display: block; margin: 0; } select { margin-top: 7px; } }
+    @media (max-width: 1180px) { .app-layout { grid-template-columns: 218px minmax(0, 1fr); } .sidebar { padding: 26px 14px; } .workspace, .support-grid { grid-template-columns: minmax(0, 1fr); } .result-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .phases { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 760px) {
+      .app-layout { display: block; } .sidebar { position: static; min-height: 0; padding: 18px 20px; gap: 18px; }
+      .brand { gap: 10px; } .brand-mark { width: 34px; height: 34px; }
+      .nav-label, .sidebar-links, .privacy-note { display: none; }
+      .phase-navigation { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+      .phase-tab { display: flex; flex-direction: column; padding: 10px 4px; text-align: center; gap: 7px; }
+      .nav-number { width: 28px; height: 28px; } .nav-name { font-size: .875rem; overflow-wrap: anywhere; } .nav-count { display: none; }
+      .shell { padding: 24px 16px; } .page-header { gap: 12px; } .version { display: none; }
+      .panel { padding: 20px; } .intro { padding: 16px 18px; } .workspace, .support-grid { gap: 18px; }
+      .result-grid, .phases { grid-template-columns: minmax(0, 1fr); }
+      .criterion label { flex-wrap: wrap; } select { flex-grow: 1; }
+      .toolbar .button { flex-grow: 1; } .section-head { gap: 12px; }
+    }
+    @media (max-width: 420px) { .phase-tab .nav-name { font-size: .875rem; } .phase-navigation { grid-template-columns: repeat(3, minmax(0, 1fr)); } h1 { font-size: 1.8rem; } }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .button { transition: none; } }
+    @media print {
+      body { background: #fff; color: #000; font-size: 11pt; }
+      .app-layout, .workspace, .support-grid { display: block; }
+      .shell { max-width: none; padding: 0; }
+      .sidebar, .intro, .toolbar, #criteriaPanel, .download-panel, .version, .skip-link { display: none !important; }
+      .panel { box-shadow: none; margin: 16px 0 0; border-radius: 0; padding: 14px; }
+      .result-hero, .result-card, .phase-chip { break-inside: avoid; }
+      .phases { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      h1 { font-size: 22pt; } h2 { font-size: 14pt; }
+      .page-header { padding-bottom: 8px; }
+      footer { font-size: 9pt; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#criteriaPanel">Ir a las condiciones</a>
+  <div class="app-layout">
+    <aside class="sidebar" aria-label="Navegación de la herramienta">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">FT</span><div><strong>Floricultura</strong><small>Hoja de ruta tecnológica</small></div></div>
+      <div><p class="nav-label">Revisar por fases</p><nav class="phase-navigation" id="phaseNavigation" aria-label="Seleccionar fase"></nav></div>
+      <nav class="sidebar-links" aria-label="Secciones"><a href="#resultPanel">Resultado y hoja de ruta</a><a href="#scopePanel">Alcance y reglas</a><a href="#downloadPanel">Descarga y manual</a></nav>
+      <div class="privacy-note"><strong>Procesamiento local</strong>Las respuestas no se guardan ni se transmiten.<p>Prototipo académico. Sin validación empresarial externa.</p></div>
+    </aside>
+    <main class="shell">
+      <header class="page-header">
+        <div><p class="eyebrow">TFE · Prototipo basado en reglas</p><h1>Orientación tecnológica<br><span>para floricultura</span></h1><p>Revise 19 condiciones para identificar la primera fase pendiente y las evidencias necesarias antes de avanzar.</p></div>
+        <span class="version">5 fases · v1.1.0</span>
+      </header>
+      <section class="intro" aria-labelledby="introTitle">
+        <h2 id="introTitle">Responda a partir de la evidencia</h2>
+        <p><strong>Sí:</strong> existe evidencia verificable. <strong>No:</strong> se confirmó su ausencia. <strong>No comprobado:</strong> la evidencia todavía es insuficiente.</p>
+        <details><summary>Explorar con un ejemplo ficticio</summary>
+          <div id="examplesNotice" class="notice" role="note">Los ejemplos no representan empresas ni resultados de campo. El resultado orienta una revisión; no certifica la madurez de una empresa.</div>
+          <div class="toolbar" aria-label="Casos demostrativos">
+            <button class="button" type="button" data-demo="manual">Base manual</button>
+            <button class="button" type="button" data-demo="baseReady">Datos listos, sin IA</button>
+            <button class="button" type="button" data-demo="inconsistent">Trazabilidad sin registros base</button>
+          </div>
+        </details>
+        <div id="demoBanner" class="notice" hidden></div>
+      </section>
+
+      <div class="workspace">
+      <section class="panel" id="criteriaPanel" aria-labelledby="criteriaTitle">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Revisión de condiciones</p>
+          <h2 id="criteriaTitle">Evidencia disponible</h2>
+          <p id="answerSummary">19 condiciones por comprobar</p>
+        </div>
+        <button class="button subtle" id="resetButton" type="button">Limpiar</button>
+      </div>
+      <form id="assessmentForm" novalidate>
+        <div id="criteriaRoot"></div>
+        <div class="form-actions">
+          <div class="phase-controls"><button class="button subtle" type="button" id="previousPhase">Anterior</button><button class="button" type="button" id="nextPhase">Siguiente fase</button></div>
+          <div class="toolbar"><button class="button primary" type="submit">Generar orientación <span aria-hidden="true">↗</span></button></div>
+          <p class="form-note">Puede generar el resultado en cualquier momento. Las condiciones no revisadas se mantienen como «No comprobado».</p>
+        </div>
+      </form>
+      <noscript><div class="notice">Active JavaScript en el navegador para utilizar el formulario y generar la orientación.</div></noscript>
+      </section>
+
+      <section class="panel result-panel" id="resultPanel" aria-labelledby="resultTitle">
+      <div class="result-title"><h2 id="resultTitle" tabindex="-1">Resultado explicable</h2><span class="result-label">Reglas explícitas</span></div>
+      <div id="staleNotice" class="notice" hidden role="status">Las respuestas cambiaron. Genere de nuevo la orientación para actualizar este resultado.</div>
+      <div id="resultRoot" class="result" aria-live="polite">
+        <div class="empty">Complete o pruebe un caso demostrativo y seleccione «Generar orientación».</div>
+      </div>
+      <h3 class="route-title">Estado de la hoja de ruta</h3>
+      <div class="phases" id="phaseStrip" aria-label="Estado de fases"></div>
+      <div class="toolbar"><button class="button subtle" type="button" id="printButton">Imprimir resultado</button></div>
+      </section>
+      </div>
+
+      <div class="support-grid">
+    <section class="panel" id="scopePanel" aria-labelledby="scopeTitle">
+      <h2 id="scopeTitle">Alcance y lectura responsable</h2>
+      <p>Este demostrador convierte la hoja de ruta propuesta en una orientación reproducible mediante reglas deterministas. Solicita únicamente condiciones organizacionales y tecnológicas agregadas —marcadas como sí, no o no comprobado—, identifica la primera fase pendiente, expone los prerrequisitos incumplidos y vincula cada recomendación con hallazgos H y requerimientos R del TFE; no solicita nombres, no almacena información y no envía datos.</p>
+      <p>La herramienta no es un modelo de aprendizaje automático, no clasifica empíricamente a los participantes ni acredita una implementación productiva. Sus casos incluidos son ejemplos demostrativos, no resultados de campo; la salida sirve para estructurar una conversación inicial y debe validarse con evidencia de la empresa, responsables designados, criterios de aceptación y decisiones humanas antes de invertir o escalar.</p>
+      <details>
+        <summary>Ver reglas de decisión y trazabilidad H/R</summary>
+        <div id="rulesTableWrap"></div>
+      </details>
+    </section>
+
+    <section class="panel download-panel" id="downloadPanel" aria-labelledby="downloadTitle">
+      <p class="eyebrow">Uso sin instalación</p>
+      <h2 id="downloadTitle">Herramienta, código y documentación</h2>
+      <p>La descarga incluye la herramienta ejecutable sin instalación, el código fuente, las reglas, el manual de uso y las pruebas automatizadas.</p>
+      <div class="toolbar">
+        <a class="button primary" id="zipDownload" href="Herramienta_TFE_Floricultura.zip" download>Descargar paquete completo</a>
+        <a class="button" href="LEEME.html">Consultar documentación</a>
+      </div>
+      <p class="form-note" id="offlineNotice" hidden>Ya está utilizando la versión descargada. Conserve la carpeta completa para acceder al manual y al código.</p>
+    </section>
+    </div>
+    <footer>Prototipo académico del TFE · Versión 1.1.0 · Evaluación local en el navegador · No guarda ni transmite respuestas</footer>
+  </main>
+  </div>
+
+  <script id="rules-source">
+  (function (root) {
+    "use strict";
+
+    const PHASES = [
+      { id: "0", name: "Alineación", optional: false, criteria: ["scope", "governance", "baseline", "budget"] },
+      { id: "1", name: "Captura básica", optional: false, criteria: ["dataModel", "offlineCapture", "maintenance", "securityContinuity", "training", "baseEvents"] },
+      { id: "2", name: "Nube y tableros", optional: false, criteria: ["repository", "access", "dashboards"] },
+      { id: "3", name: "Calidad asistida", optional: true, gate: "visualCase", criteria: ["imageProtocol", "humanReview"] },
+      { id: "4", name: "Trazabilidad ampliada", optional: true, gate: "traceabilityNeed", criteria: ["custodyIntegration", "traceReports"] }
+    ];
+
+    const CRITERIA = {
+      scope: { phase: "0", title: "Alcance y procesos piloto definidos", prompt: "Existe un acta de alcance con procesos críticos, responsables y límites del piloto.", refs: "H11 · R-ARC-01", output: "Acta de alcance, procesos piloto y responsable de decisión." },
+      governance: { phase: "0", title: "Gobierno del dato asignado", prompt: "Están designados patrocinador, dueño de proceso, custodio del dato y responsabilidades RACI.", refs: "H06 · R-GOV-01", output: "RACI aprobado y responsables de registro, corrección, acceso y respuesta." },
+      baseline: { phase: "0", title: "Línea base y criterios de aceptación", prompt: "La situación inicial, los indicadores y la condición para continuar, ajustar o detener están documentados.", refs: "H11 · R-ARC-01", output: "Línea base, indicadores, criterio de entrada y criterio de salida." },
+      budget: { phase: "0", title: "Recursos preliminares identificados", prompt: "Se dispone de un rango preliminar de recursos, una alternativa escalable y un responsable para revisar la viabilidad antes del piloto.", refs: "H12 · R-FIN-01", output: "Rango preliminar de recursos, responsable y nota de viabilidad; completar el TCO a tres años antes de invertir." },
+      dataModel: { phase: "1", title: "Variables y formatos comunes", prompt: "Hay diccionario de variables, campos obligatorios, identificadores y reglas de validación comunes.", refs: "H01 · R-DAT-01", output: "Diccionario de datos y reglas de validación aprobados." },
+      offlineCapture: { phase: "1", title: "Captura tolerante a desconexión", prompt: "La captura prioritaria puede conservar datos localmente, sincronizar después y registrar el estado de transmisión.", refs: "H02 · R-IOT-01", output: "Prueba de desconexión, recuperación y transmisión sin pérdida." },
+      maintenance: { phase: "1", title: "Mantenimiento, soporte y transferencia", prompt: "Dispositivos, calibraciones, repuestos, firmware, soporte, escalamiento y transferencia de conocimiento tienen responsables y calendario.", refs: "H03 · H15 · R-MNT-01 · R-SUP-01", output: "Inventario, calendario de calibración, SLA, exportación de datos y plan de transferencia o salida." },
+      securityContinuity: { phase: "1", title: "Seguridad y continuidad operativa", prompt: "Hay cuentas individuales, mínimo privilegio, copias, restauración probada y contingencia manual para picos o fallos.", refs: "H08 · H09 · R-OPS-01 · R-SEC-01", output: "Matriz de acceso, evidencia de restauración probada y procedimiento de contingencia." },
+      training: { phase: "1", title: "Formación, revisión humana y aprendizaje documentado", prompt: "Los usuarios participan en el diseño, reciben formación por rol, aplican un protocolo de excepciones y registran incidentes, decisiones, cierres y lecciones para la revisión posterior de cada fase.", refs: "H07 · H14 · R-CHG-01 · R-LRN-01", output: "Plan de formación, evaluación práctica, protocolo de excepciones y repositorio de incidentes, decisiones y lecciones." },
+      baseEvents: { phase: "1", title: "Registros base con identificador persistente", prompt: "Cada lote conserva un identificador y registra eventos con fecha, actor, ubicación, estado, decisión y excepción.", refs: "H04 · R-TRA-01", output: "Historial base por lote con identificador persistente y sello de tiempo." },
+      repository: { phase: "2", title: "Repositorio central e intercambio documentado", prompt: "Los registros válidos se consolidan en un repositorio común con importación y exportación documentadas.", refs: "H01 · R-DAT-01", output: "Repositorio central, interfaces documentadas y cola de calidad." },
+      access: { phase: "2", title: "Usuarios, permisos y responsables de alerta", prompt: "Los perfiles de acceso son coherentes y cada alerta tiene responsable y plazo de atención.", refs: "H06 · H09 · R-GOV-01 · R-SEC-01", output: "Perfiles de acceso, bitácora y matriz de responsables de alertas." },
+      dashboards: { phase: "2", title: "Tableros y reportes internos operativos", prompt: "Los indicadores, alertas y reportes internos se generan desde el repositorio común y responden a una necesidad operativa de usuarios responsables.", refs: "H01 · H06 · R-DAT-01 · R-GOV-01", output: "Tablero interno activo, alertas con responsable y reporte operativo reconstruible desde el repositorio." },
+      visualCase: { phase: "3", gate: true, title: "Necesidad de calidad visual asistida", prompt: "Existe un caso de uso visual acotado cuya utilidad justifica explorar imágenes; la IA no se activa solo por disponibilidad tecnológica.", refs: "H10 · H11 · R-AI-01 · R-ARC-01", output: "Caso de uso, usuario, decisión apoyada y criterio de éxito." },
+      imageProtocol: { phase: "3", title: "Protocolo y muestra de imágenes gobernados", prompt: "Se definieron condiciones de captura, metadatos, etiquetas versionadas y separación de conjuntos para el caso visual.", refs: "H10 · R-AI-01", output: "Protocolo de imagen, repositorio con metadatos y etiquetas versionadas." },
+      humanReview: { phase: "3", title: "Validación y decisión humana", prompt: "Están definidos acuerdo entre evaluadores, métricas por clase, umbral de confianza y ruta de revisión humana.", refs: "H07 · H10 · R-CHG-01 · R-AI-01", output: "Plan de validación por variedad y protocolo de revisión humana." },
+      traceabilityNeed: { phase: "4", gate: true, title: "Necesidad de trazabilidad ampliada", prompt: "Existe una necesidad verificable de reconstruir cadena de custodia con terceros, frío, despacho o exigencias de cliente.", refs: "H05 · H13 · R-TRA-02 · R-INT-02", output: "Caso de trazabilidad, actores, eventos, consultas y criterio de aceptación." },
+      custodyIntegration: { phase: "4", title: "Eventos interoperables con terceros", prompt: "Transferencias y excepciones usan el identificador común, sello de tiempo, reloj de referencia y estado de sincronización.", refs: "H04 · H13 · R-INT-02", output: "API o intercambio de eventos, reglas de conciliación y manejo de excepciones." },
+      traceReports: { phase: "4", title: "Reportes externos auditables y cadena de custodia", prompt: "El historial de cadena de custodia y los reportes externos se reconstruyen desde los eventos base y se contrastan con un caso de cliente o auditoría.", refs: "H05 · R-TRA-02", output: "Historial de cadena de custodia consultable y reporte externo auditable contra el dato fuente." }
+    };
+
+    const VALID_STATES = ["si", "no", "no_comprobado"];
+
+    function normalizeAnswers(input) {
+      const answers = {};
+      Object.keys(CRITERIA).forEach(function (key) {
+        answers[key] = VALID_STATES.includes(input && input[key]) ? input[key] : "no_comprobado";
+      });
+      return answers;
+    }
+
+    function missingFor(phase, answers) {
+      return phase.criteria.filter(function (key) { return answers[key] !== "si"; });
+    }
+
+    function firstPendingCore(answers) {
+      for (const phase of PHASES.slice(0, 3)) {
+        if (missingFor(phase, answers).length) return phase;
+      }
+      return null;
+    }
+
+    function buildWarnings(answers) {
+      const warnings = [];
+      const phase0Incomplete = missingFor(PHASES[0], answers).length > 0;
+      const phase1Incomplete = missingFor(PHASES[1], answers).length > 0;
+      const downstream1 = PHASES[1].criteria.some(function (key) { return answers[key] === "si"; });
+      const downstream2 = PHASES[2].criteria.some(function (key) { return answers[key] === "si"; });
+
+      if (phase0Incomplete && (downstream1 || downstream2 || answers.visualCase === "si" || answers.traceabilityNeed === "si")) {
+        warnings.push({ code: "phase0_prerequisite", text: "Hay condiciones posteriores marcadas como cumplidas, pero la alineación todavía no está completa. La orientación vuelve a la fase 0 porque el alcance, el gobierno, la línea base y los recursos son prerrequisitos." });
+      }
+      if (!phase0Incomplete && phase1Incomplete && (downstream2 || answers.visualCase === "si" || answers.traceabilityNeed === "si")) {
+        warnings.push({ code: "phase1_prerequisite", text: "Hay capacidades posteriores declaradas, pero la captura básica todavía tiene condiciones pendientes. La secuencia vuelve a la fase 1 antes de consolidar nube, calidad asistida o trazabilidad ampliada." });
+      }
+      if (answers.baseEvents !== "si" && (answers.traceabilityNeed === "si" || answers.custodyIntegration === "si" || answers.traceReports === "si")) {
+        warnings.push({ code: "downstream_without_base", text: "Se declaró trazabilidad ampliada sin registros base sustentados con evidencia. Primero se requiere un identificador persistente y eventos mínimos por lote (H04; R-TRA-01)." });
+      }
+      if (answers.visualCase === "no" && (answers.imageProtocol === "si" || answers.humanReview === "si")) {
+        warnings.push({ code: "ai_without_case", text: "Se marcaron capacidades de imágenes, pero no existe una necesidad visual confirmada. La fase 3 no se activa hasta justificar el caso de uso y la decisión que apoyará." });
+      }
+      return warnings;
+    }
+
+    function phaseStatus(phase, answers, recommendation) {
+      if (phase.gate && answers[phase.gate] !== "si") return "inactive";
+      const position = PHASES.indexOf(phase);
+      const requiredPredecessors = PHASES.slice(0, Math.min(position, 3));
+      const hasPendingPrerequisite = requiredPredecessors.some(function (previous) {
+        return missingFor(previous, answers).length > 0;
+      });
+      if (!missingFor(phase, answers).length) return hasPendingPrerequisite ? "declared_blocked" : "complete";
+      if (recommendation && recommendation.id === phase.id) return "pending";
+      return "not_reached";
+    }
+
+    function evaluate(input) {
+      const answers = normalizeAnswers(input);
+      const warnings = buildWarnings(answers);
+      let recommendation = firstPendingCore(answers);
+      const notices = [];
+
+      if (!recommendation) {
+        if (answers.visualCase === "si" && missingFor(PHASES[3], answers).length) {
+          recommendation = PHASES[3];
+        } else if (answers.visualCase !== "si") {
+          notices.push(answers.visualCase === "no"
+            ? "La fase 3 no se activa porque no se declaró y sustentó una necesidad de calidad visual asistida."
+            : "La fase 3 permanece sin activar hasta comprobar un caso de uso visual; no se presume la necesidad de IA.");
+        }
+      }
+
+      if (!recommendation) {
+        if (answers.traceabilityNeed === "si" && missingFor(PHASES[4], answers).length) {
+          recommendation = PHASES[4];
+        } else if (answers.traceabilityNeed !== "si") {
+          notices.push(answers.traceabilityNeed === "no"
+            ? "La fase 4 no se activa porque no se declaró y sustentó una necesidad de trazabilidad ampliada."
+            : "La fase 4 permanece sin activar hasta comprobar una necesidad de cadena de custodia ampliada.");
+        }
+      }
+
+      const missingKeys = recommendation ? missingFor(recommendation, answers) : [];
+      const result = {
+        kind: recommendation ? "phase" : "ready",
+        phase: recommendation ? recommendation.id : null,
+        phaseName: recommendation ? recommendation.name : "Ruta base completada",
+        answers: answers,
+        missing: missingKeys.map(function (key) {
+          return { key: key, state: answers[key], criterion: CRITERIA[key] };
+        }),
+        warnings: warnings,
+        notices: notices,
+        phaseStates: PHASES.map(function (phase) {
+          return { id: phase.id, name: phase.name, state: phaseStatus(phase, answers, recommendation) };
+        })
+      };
+
+      result.headline = recommendation
+        ? "Primera fase pendiente: " + recommendation.id + ". " + recommendation.name
+        : "Según las respuestas ingresadas, las fases obligatorias se declaran cumplidas; no hay otra fase activada pendiente";
+      result.explanation = recommendation
+        ? "La recomendación se detiene en la primera fase con evidencia faltante. Antes de avanzar deben resolverse las condiciones marcadas como «No» o «No comprobado» y contrastarse sus productos de salida con evidencia de la empresa."
+        : "Las respuestas ingresadas son «Sí» para las condiciones de las fases 0, 1 y 2. Esta salida orienta la revisión, no certifica el cumplimiento: cada respuesta debe contrastarse con evidencia de la empresa, responsables y criterios de aceptación. Las fases opcionales solo se activan por una necesidad confirmada.";
+      return result;
+    }
+
+    const DEMOS = {
+      manual: {
+        label: "Caso demostrativo: operación con base manual",
+        values: { scope: "si", governance: "no", baseline: "no_comprobado", budget: "no", dataModel: "no", offlineCapture: "no_comprobado", maintenance: "no_comprobado", securityContinuity: "no_comprobado", training: "si", baseEvents: "no", repository: "no", access: "no_comprobado", dashboards: "no", visualCase: "no_comprobado", imageProtocol: "no_comprobado", humanReview: "no_comprobado", traceabilityNeed: "no_comprobado", custodyIntegration: "no_comprobado", traceReports: "no_comprobado" }
+      },
+      baseReady: {
+        label: "Caso demostrativo: datos y tableros listos, sin necesidad de IA",
+        values: { scope: "si", governance: "si", baseline: "si", budget: "si", dataModel: "si", offlineCapture: "si", maintenance: "si", securityContinuity: "si", training: "si", baseEvents: "si", repository: "si", access: "si", dashboards: "si", visualCase: "no", imageProtocol: "no_comprobado", humanReview: "no_comprobado", traceabilityNeed: "no", custodyIntegration: "no_comprobado", traceReports: "no_comprobado" }
+      },
+      inconsistent: {
+        label: "Caso demostrativo: trazabilidad solicitada sin registros base",
+        values: { scope: "si", governance: "si", baseline: "si", budget: "si", dataModel: "si", offlineCapture: "si", maintenance: "si", securityContinuity: "si", training: "si", baseEvents: "no", repository: "si", access: "si", dashboards: "si", visualCase: "no", imageProtocol: "no_comprobado", humanReview: "no_comprobado", traceabilityNeed: "si", custodyIntegration: "si", traceReports: "si" }
+      }
+    };
+
+    root.ClasificadorTFE = Object.freeze({ PHASES: PHASES, CRITERIA: CRITERIA, VALID_STATES: VALID_STATES, DEMOS: DEMOS, evaluate: evaluate, normalizeAnswers: normalizeAnswers });
+  }(typeof globalThis !== "undefined" ? globalThis : this));
+  </script>
+
+  <script>
+  (function () {
+    "use strict";
+    const model = window.ClasificadorTFE;
+    const form = document.getElementById("assessmentForm");
+    const criteriaRoot = document.getElementById("criteriaRoot");
+    const resultRoot = document.getElementById("resultRoot");
+    const phaseStrip = document.getElementById("phaseStrip");
+    const demoBanner = document.getElementById("demoBanner");
+    const navigation = document.getElementById("phaseNavigation");
+    const staleNotice = document.getElementById("staleNotice");
+    let currentPhase = 0;
+    let hasResult = false;
+    const labels = { si: "Sí", no: "No", no_comprobado: "No comprobado" };
+
+    function optionMarkup(selected) {
+      return model.VALID_STATES.map(function (state) {
+        return '<option value="' + state + '"' + (selected === state ? " selected" : "") + '>' + labels[state] + '</option>';
+      }).join("");
+    }
+
+    function criterionMarkup(key) {
+      const item = model.CRITERIA[key];
+      return '<div class="criterion' + (item.gate ? ' gate' : '') + '">' +
+        '<div><h3>' + escapeHtml(item.title) + '</h3><p>' + escapeHtml(item.prompt) + '</p><div class="trace">' + escapeHtml(item.refs) + '</div></div>' +
+        '<label for="field-' + key + '"><span>Evidencia disponible</span><select aria-label="' + escapeHtml(item.title) + ': evidencia disponible" id="field-' + key + '" name="' + key + '">' + optionMarkup("no_comprobado") + '</select></label>' +
+        '</div>';
+    }
+
+    function renderCriteria() {
+      criteriaRoot.innerHTML = model.PHASES.map(function (phase) {
+        const gate = phase.gate ? [phase.gate] : [];
+        return '<section class="phase-section" id="phase-section-' + phase.id + '" aria-labelledby="phase-' + phase.id + '-title">' +
+          '<div class="phase-heading"><span class="phase-heading-number" aria-hidden="true">' + phase.id + '</span><div><h2 tabindex="-1" id="phase-' + phase.id + '-title">Fase ' + phase.id + '. ' + escapeHtml(phase.name) + '</h2><small>' + (phase.optional ? 'Condicionada a una necesidad comprobada' : 'Parte de la secuencia obligatoria') + '</small></div></div>' +
+          '<div class="criterion-list">' + gate.concat(phase.criteria).map(criterionMarkup).join("") + '</div></section>';
+      }).join("");
+      navigation.innerHTML = model.PHASES.map(function(phase) {
+        return '<button type="button" class="phase-tab" data-phase="' + phase.id + '" aria-controls="phase-section-' + phase.id + '" aria-pressed="false"><span class="nav-number" aria-hidden="true">' + phase.id + '</span><span><span class="nav-name">' + escapeHtml(phase.name) + '</span><span class="nav-count" id="phase-count-' + phase.id + '"></span></span></button>';
+      }).join("");
+    }
+
+    function showPhase(index, moveFocus) {
+      currentPhase = Math.max(0, Math.min(model.PHASES.length - 1, index));
+      model.PHASES.forEach(function(phase, position) {
+        document.getElementById("phase-section-" + phase.id).hidden = position !== currentPhase;
+        navigation.querySelector('[data-phase="' + phase.id + '"]').setAttribute("aria-pressed", String(position === currentPhase));
+      });
+      document.getElementById("previousPhase").disabled = currentPhase === 0;
+      document.getElementById("nextPhase").disabled = currentPhase === model.PHASES.length - 1;
+      if (moveFocus) document.getElementById("phase-" + model.PHASES[currentPhase].id + "-title").focus();
+    }
+
+    function refreshAnswerState() {
+      const answers = readAnswers();
+      const unchecked = Object.keys(model.CRITERIA).filter(function(key) { return answers[key] === "no_comprobado"; }).length;
+      document.getElementById("answerSummary").textContent = unchecked ? unchecked + " de 19 condiciones sin comprobar" : "19 condiciones respondidas con Sí o No";
+      model.PHASES.forEach(function(phase) {
+        const keys = (phase.gate ? [phase.gate] : []).concat(phase.criteria);
+        const answered = keys.filter(function(key) { return answers[key] !== "no_comprobado"; }).length;
+        document.getElementById("phase-count-" + phase.id).textContent = answered + "/" + keys.length + " con Sí o No";
+      });
+      Object.keys(model.CRITERIA).forEach(function(key) { form.elements[key].dataset.answer = answers[key]; });
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>'"]/g, function (char) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char];
+      });
+    }
+
+    function readAnswers() {
+      const data = new FormData(form);
+      const values = {};
+      Object.keys(model.CRITERIA).forEach(function (key) { values[key] = data.get(key); });
+      return values;
+    }
+
+    function setAnswers(values) {
+      Object.keys(model.CRITERIA).forEach(function (key) {
+        form.elements[key].value = values[key] || "no_comprobado";
+      });
+      refreshAnswerState();
+    }
+
+    function renderPhaseStrip(states) {
+      phaseStrip.innerHTML = states.map(function (item) {
+        const stateLabel = { complete: "Declarada cumplida", declared_blocked: "Declarada, con prerrequisitos pendientes", pending: "Primera pendiente", inactive: "Sin activar", not_reached: "Posterior", awaiting: "Por revisar" }[item.state];
+        return '<div class="phase-chip" data-state="' + item.state + '"><span class="route-number" aria-label="Fase ' + item.id + '">' + item.id + '</span><div><strong>' + escapeHtml(item.name) + '</strong><span class="route-state">' + stateLabel + '</span></div></div>';
+      }).join("");
+    }
+
+    function renderResult(result) {
+      const missing = result.missing.length
+        ? '<div class="result-card"><h3>Condiciones no satisfechas</h3><ul>' + result.missing.map(function (entry) {
+            return '<li><strong>' + escapeHtml(entry.criterion.title) + '</strong> — ' + labels[entry.state] + '<br><span class="trace">' + escapeHtml(entry.criterion.refs) + '</span></li>';
+          }).join("") + '</ul></div>'
+        : '<div class="result-card"><h3>Condiciones obligatorias</h3><p>Según las respuestas ingresadas, las fases 0, 1 y 2 cuentan con «Sí» en todos sus prerrequisitos. La evidencia debe revisarse antes de aceptar el paso de fase.</p></div>';
+      const outputs = result.missing.length
+        ? '<div class="result-card"><h3>Salidas concretas antes de avanzar</h3><ul>' + result.missing.map(function (entry) {
+            return '<li>' + escapeHtml(entry.criterion.output) + '<br><span class="trace">' + escapeHtml(entry.criterion.refs) + '</span></li>';
+          }).join("") + '</ul></div>'
+        : '<div class="result-card"><h3>Decisión siguiente</h3><p>Conservar evidencias de aceptación, revisar incidentes y activar una fase condicionada solo si existe una necesidad verificable.</p></div>';
+      const warnings = result.warnings.length
+        ? '<div class="result-card warning"><h3>Incoherencias o dependencias detectadas</h3><ul>' + result.warnings.map(function (item) { return '<li>' + escapeHtml(item.text) + '</li>'; }).join("") + '</ul></div>'
+        : '';
+      const notices = result.notices.length
+        ? '<div class="result-card"><h3>Fases condicionadas</h3><ul>' + result.notices.map(function (text) { return '<li>' + escapeHtml(text) + '</li>'; }).join("") + '</ul></div>'
+        : '';
+
+      const exampleNote = demoBanner.hidden ? '' : '<div class="notice">' + escapeHtml(demoBanner.textContent) + '</div>';
+      resultRoot.innerHTML = exampleNote + '<div class="result-hero ' + (result.kind === "ready" ? "ready" : "pending") + '">' +
+        '<p class="eyebrow">Orientación por reglas</p><h2>' + escapeHtml(result.headline) + '</h2><p>' + escapeHtml(result.explanation) + '</p>' +
+        '<p class="reading-note"><strong>Lectura:</strong> no se calcula una puntuación, promedio ni nivel de madurez. La regla selecciona el primer prerrequisito pendiente de la secuencia.</p></div>' +
+        '<div class="result-grid">' + missing + outputs + warnings + notices + '</div>';
+      renderPhaseStrip(result.phaseStates);
+    }
+
+    function runAssessment() {
+      const result = model.evaluate(readAnswers());
+      renderResult(result);
+      hasResult = true;
+      staleNotice.hidden = true;
+      return result;
+    }
+
+    function reset() {
+      const values = {};
+      Object.keys(model.CRITERIA).forEach(function (key) { values[key] = "no_comprobado"; });
+      setAnswers(values);
+      demoBanner.hidden = true;
+      hasResult = false;
+      staleNotice.hidden = true;
+      resultRoot.innerHTML = '<div class="empty"><strong>La orientación aparecerá aquí</strong><p>Revise las condiciones de cada fase y seleccione «Generar orientación». También puede explorar un ejemplo ficticio.</p></div>';
+      renderPhaseStrip(model.PHASES.map(function (phase) { return { id: phase.id, name: phase.name, state: phase.optional ? "inactive" : "awaiting" }; }));
+      showPhase(0, false);
+    }
+
+    function renderRulesTable() {
+      const rows = Object.keys(model.CRITERIA).map(function (key) {
+        const item = model.CRITERIA[key];
+        return '<tr><td>Fase ' + item.phase + '</td><td>' + escapeHtml(item.title) + '</td><td>' + escapeHtml(item.refs) + '</td><td>' + escapeHtml(item.output) + '</td></tr>';
+      }).join("");
+      document.getElementById("rulesTableWrap").innerHTML = '<div style="overflow:auto"><table class="rules-table"><thead><tr><th>Fase</th><th>Condición</th><th>Trazabilidad</th><th>Evidencia de salida</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+    }
+
+    renderCriteria();
+    renderRulesTable();
+    reset();
+
+    function focusResult() { document.getElementById("resultTitle").focus(); }
+    form.addEventListener("submit", function (event) { event.preventDefault(); runAssessment(); focusResult(); });
+    form.addEventListener("change", function() {
+      refreshAnswerState();
+      staleNotice.hidden = !hasResult;
+      if (!demoBanner.hidden) demoBanner.textContent = "Ejemplo ficticio modificado. Las respuestas editadas no representan resultados de campo.";
+    });
+    navigation.addEventListener("click", function(event) {
+      const button = event.target.closest("[data-phase]");
+      if (button) showPhase(Number(button.dataset.phase), true);
+    });
+    document.getElementById("previousPhase").addEventListener("click", function() { showPhase(currentPhase - 1, true); });
+    document.getElementById("nextPhase").addEventListener("click", function() { showPhase(currentPhase + 1, true); });
+    document.getElementById("resetButton").addEventListener("click", reset);
+    document.getElementById("printButton").addEventListener("click", function () { runAssessment(); window.print(); });
+    document.querySelectorAll("[data-demo]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const demo = model.DEMOS[button.dataset.demo];
+        setAnswers(demo.values);
+        demoBanner.textContent = demo.label + ". Valores ficticios para probar la lógica; no representan una empresa ni resultados de campo.";
+        demoBanner.hidden = false;
+        runAssessment();
+        focusResult();
+      });
+    });
+    if (window.location.protocol === "file:") {
+      document.getElementById("zipDownload").hidden = true;
+      document.getElementById("offlineNotice").hidden = false;
+    }
+
+    // Optional page-scoped tool: the same state and rules as the visible form.
+    const context = document.modelContext;
+    if (context && typeof context.registerTool === "function") {
+      const lifecycle = new AbortController();
+      const answerProperties = {};
+      Object.keys(model.CRITERIA).forEach(function (key) {
+        answerProperties[key] = {type:"string", enum:model.VALID_STATES.slice(), description:model.CRITERIA[key].title};
+      });
+      try {
+        Promise.resolve(context.registerTool({
+          name: "generar_orientacion_tecnologica",
+          title: "Generar orientación tecnológica",
+          description: "Sustituye las condiciones del formulario y genera la orientación por reglas del TFE. No guarda ni envía respuestas. Las condiciones omitidas quedan como no comprobadas.",
+          inputSchema: {type:"object", properties:{respuestas:{type:"object", properties:answerProperties, additionalProperties:false}}, required:["respuestas"], additionalProperties:false},
+          annotations:{readOnlyHint:false, untrustedContentHint:false},
+          execute: function (input) {
+            if (!input || typeof input !== "object" || Array.isArray(input) || Object.keys(input).some(function(k){return k!=="respuestas";})) throw new Error("Se requiere un objeto con respuestas.");
+            const values = input.respuestas;
+            if (!values || typeof values !== "object" || Array.isArray(values)) throw new Error("Respuestas debe ser un objeto.");
+            Object.keys(values).forEach(function (key) {
+              if (!Object.prototype.hasOwnProperty.call(model.CRITERIA,key) || !model.VALID_STATES.includes(values[key])) throw new Error("Condición o estado no permitido: " + key);
+            });
+            setAnswers(model.normalizeAnswers(values));
+            demoBanner.hidden = true;
+            const result = runAssessment();
+            return {tipo:result.kind, fase:result.phase, titulo:result.headline, pendientes:result.missing.map(function(x){return x.key;}), advertencias:result.warnings.map(function(x){return x.code;}), estados:result.phaseStates};
+          }
+        }, {signal:lifecycle.signal})).catch(function(){ /* Manual use remains available. */ });
+        window.addEventListener("pagehide",function(){lifecycle.abort();},{once:true});
+      } catch { /* Unsupported registration never blocks the form. */ }
+    }
+  }());
+  </script>
+</body>
+</html>
